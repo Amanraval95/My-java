@@ -1,0 +1,137 @@
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Random;
+import java.util.Scanner;
+
+
+import com.mysql.cj.protocol.Resultset;
+class generate{
+//
+    public String numbersGenarator="0123456789";
+}
+
+public class BankApp {
+    generate bring = new generate();
+    // Access calling = new Access();
+    private int choice,AccountPassword;
+    // BigInteger  = new BigInteger(AccountNumberGenerator());
+    
+    private String AccountType=null,AccountHolderName=null,Account_Number=null;
+    private double deposite,balance;
+    private char randomchar;
+    static private String NewUserInsertQuery="INSERT INTO bank_details(AccountType,AccountNumber,AccountHolder_Name,Balance,Password) VALUES(?,?,?,?,?)";
+    private static final String jdbc ="jdbc:mysql://localhost:3306/bank";
+    private static final String Username = "root";
+    private static final String Password = "Zappy888";
+    
+    Connection connection=null;
+    
+    
+    Resultset result=null;
+    PreparedStatement preparedStatement=null;
+    
+    
+    Scanner call = new Scanner(System.in);
+    public void DATABASECONNECTION(){
+        
+        try {
+            connection=DriverManager.getConnection(jdbc, Username, Password);
+            Statement statement= connection.createStatement();
+        } catch (SQLException e) {
+            
+            e.printStackTrace();
+        }
+    }
+    public void input(){
+        DATABASECONNECTION();
+        System.out.println("Welcome To The Bank\n1. Existing User\n2. Create New Account");
+        choice=call.nextInt();
+        switch (choice) {
+                    case 1:
+                    ExistingUser();
+                    break;
+                    case 2:
+                    NewUser();
+                    break;
+                    
+                    default:
+                    System.out.println("Invalid Input");
+                    break;
+                }
+            }   
+            
+            //*****************************EXISTING  USER************************/
+            public void ExistingUser()
+            {
+                System.out.println("Enter Your Unique Account Number");
+                Account_Number=call.nextLine(); 
+                 String VerifyAccountNumberQuery="SELECT * FROM bank_details WHERE AccountNumber = '"+Account_Number+"'"; 
+                
+                try {
+                    
+                    result=statement.executeQuery(VerifyAccountNumberQuery); 
+                } catch (SQLException e) {
+                   e.printStackTrace();
+                }
+
+            }
+            //*****************************NEW  USER************************/
+            public void NewUser(){
+                System.out.println("What kind of Account You Want To Open\n1. Current  2.Saving");
+                choice=call.nextInt();
+                if (choice==1) {
+                    AccountType="Current";
+                } else {
+                    AccountType="Saving";
+                }
+                call.nextLine();
+                System.out.println("Enter Your Full Name");
+                AccountHolderName=call.nextLine();
+            
+                System.out.println("Enter Your First deposite >500");
+                deposite=call.nextDouble();
+                balance=deposite;
+
+                System.out.println("Enter 8 digit Password ");
+                AccountPassword=call.nextInt();
+            
+                
+                System.out.println("Here Is Your Unique Account Number "+Account_Number);
+                try {
+                    preparedStatement=connection.prepareStatement(NewUserInsertQuery);
+                    preparedStatement.setString(1, AccountType);
+                    preparedStatement.setBigDecimal(2, new BigDecimal(Account_Number));
+                    preparedStatement.setString(3,  AccountHolderName);
+                    preparedStatement.setDouble(4, balance);
+                    preparedStatement.setInt(5, AccountPassword );
+                    preparedStatement.executeUpdate();
+                } catch (SQLException e) {
+                    
+                    System.out.println("ERROR");
+                    e.printStackTrace();
+                }
+            }
+            public String AccountNumberGenerator()
+            {
+                Random random = new Random();
+                StringBuilder stringbuilder = new StringBuilder(15);
+                for(int i=0;i<15;i++)
+                {
+                    choice=random.nextInt(bring.numbersGenarator.length());
+                    randomchar=bring.numbersGenarator.charAt(choice);
+                    stringbuilder.append(randomchar);
+                    
+                }
+                return stringbuilder.toString();
+            } 
+    public static void main(String[] args){ 
+      BankApp start= new BankApp();
+      start.input();
+        }
+    
+}
